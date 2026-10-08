@@ -34,6 +34,9 @@ int width, height, channels;
 unsigned char* dev_imageData = nullptr;
 unsigned char* dev_greyScaleOutputImage = nullptr;
 
+unsigned char* outputSobelImage = nullptr;
+unsigned char* dev_sobelOutputImage = nullptr;
+
 void uninitialize(void);
 
 int main(void)
@@ -64,7 +67,7 @@ int main(void)
 	HANDLE_ERROR(cudaMalloc((void**)&dev_imageData, totalSizeOfImageInBytes));
 	HANDLE_ERROR(cudaMalloc((void**)&dev_greyScaleOutputImage, totalSizeOfImageInBytes));
 
-	// allocate host memoryfor grey scale image output
+	// allocate host memory for grey scale image output
 
 	outputGreyScaleImage = (unsigned char*)malloc(totalSizeOfImageInBytes);
 
@@ -82,8 +85,6 @@ int main(void)
 
 	launchGreyScaleKernel(dev_imageData, dev_greyScaleOutputImage, width, height);
 
-	fprintf(logFile, "\n\nGrey scale kernel executed successfully !\n\n");
-
 	// copy grey scale output image to cpu side
 
 	HANDLE_ERROR(cudaMemcpy(outputGreyScaleImage, dev_greyScaleOutputImage, totalSizeOfImageInBytes, cudaMemcpyDeviceToHost));
@@ -92,6 +93,21 @@ int main(void)
 
 	stbi_write_jpg("../output/Grey_Scale_Lotus.jpg", width, height, 3, outputGreyScaleImage, 100);
 
+	// allocate GPU and CPU buffer for sobel output image
+
+	outputSobelImage = (unsigned char*)malloc(totalSizeOfImageInBytes);
+
+	if (outputSobelImage == nullptr)
+	{
+		fprintf(logFile, "host side memory allocation for sobel output image failed !");
+		exit(EXIT_FAILURE);
+	}
+
+	HANDLE_ERROR(cudaMalloc((void**)&dev_sobelOutputImage, totalSizeOfImageInBytes));
+
+	launchSobelKernel(dev_greyScaleOutputImage, dev_sobelOutputImage, width, height);
+
+	//HANDLE_ERROR(cudaMemcpy(outputSobelImage, dev_sobelOutputImage, totalSizeOfImageInBytes, cudaMemcpyDeviceToHost))
 
 
 	uninitialize();
@@ -102,6 +118,18 @@ int main(void)
 
 void uninitialize(void)
 {
+
+	if (dev_sobelOutputImage)
+	{
+		cudaFree(dev_sobelOutputImage);
+		dev_sobelOutputImage = nullptr;
+	}
+
+	if (outputSobelImage)
+	{
+		free(outputSobelImage);
+		outputSobelImage = nullptr;
+	}
 
 	if (outputGreyScaleImage)
 	{
