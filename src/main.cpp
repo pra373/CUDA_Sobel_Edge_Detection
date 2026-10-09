@@ -37,6 +37,11 @@ unsigned char* dev_greyScaleOutputImage = nullptr;
 unsigned char* outputSobelImage = nullptr;
 unsigned char* dev_sobelOutputImage = nullptr;
 
+//sobel arrays
+
+int host_sobelGx[9] = { -1, 0 ,1, -2, 0 ,2, -1, 0 , 1 };
+int host_sobelGy[9] = { -1, -2, -1, 0, 0, 0, 1, 2, 1 };
+
 void uninitialize(void);
 
 int main(void)
@@ -85,13 +90,20 @@ int main(void)
 
 	launchGreyScaleKernel(dev_imageData, dev_greyScaleOutputImage, width, height);
 
+	HANDLE_ERROR(cudaGetLastError());
+	HANDLE_ERROR(cudaDeviceSynchronize());
+
+	fprintf(logFile, "Grayscale kernel executed successfully!\n");
+
 	// copy grey scale output image to cpu side
 
 	HANDLE_ERROR(cudaMemcpy(outputGreyScaleImage, dev_greyScaleOutputImage, totalSizeOfImageInBytes, cudaMemcpyDeviceToHost));
 
 	//write grey scale output image 
 
-	stbi_write_jpg("../output/Grey_Scale_Lotus.jpg", width, height, 3, outputGreyScaleImage, 100);
+	int result_greyScale = stbi_write_jpg("../output/Grey_Scale_Lotus.jpg", width, height, 3, outputGreyScaleImage, 100);
+
+	fprintf(logFile, "Grey scale image write result: %d\n", result_greyScale);
 
 	// allocate GPU and CPU buffer for sobel output image
 
@@ -105,10 +117,20 @@ int main(void)
 
 	HANDLE_ERROR(cudaMalloc((void**)&dev_sobelOutputImage, totalSizeOfImageInBytes));
 
+	copySobelConstantsToDevice(host_sobelGx, host_sobelGy);
+
 	launchSobelKernel(dev_greyScaleOutputImage, dev_sobelOutputImage, width, height);
 
-	//HANDLE_ERROR(cudaMemcpy(outputSobelImage, dev_sobelOutputImage, totalSizeOfImageInBytes, cudaMemcpyDeviceToHost))
+	HANDLE_ERROR(cudaGetLastError());
+	HANDLE_ERROR(cudaDeviceSynchronize());
 
+	fprintf(logFile, "Sobel kernel executed successfully!\n");
+
+	HANDLE_ERROR(cudaMemcpy(outputSobelImage, dev_sobelOutputImage, totalSizeOfImageInBytes, cudaMemcpyDeviceToHost));
+	
+	int result_sobel = stbi_write_jpg("../output/Sobel_Lotus.jpg", width, height, 3, outputSobelImage, 100);
+
+	fprintf(logFile, "Sobel image write result: %d\n", result_sobel);
 
 	uninitialize();
 
