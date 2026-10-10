@@ -42,7 +42,7 @@ __global__ void sobelKernel(unsigned char* dev_imageData, unsigned char* dev_sob
 
 	float magnetude = sqrtf((Gx * Gx) + (Gy * Gy));
 
-	if (magnetude > 40)
+	if (magnetude > 60)
 	{
 		dev_sobelOutputImage[RGBOffset] = 255;
 		dev_sobelOutputImage[RGBOffset + 1] = 255;
