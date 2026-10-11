@@ -57,7 +57,7 @@ The result is a black-and-white image that highlights the shapes, outlines, and 
 
 | Metric                         |      Result |
 | ------------------------------ | ----------: |
-| Image Resolution               | 4160 � 6240 |
+| Image Resolution               | 4160 X 6240 |
 | Total Pixels                   |  25,958,400 |
 | Grayscale Kernel Time          |   2.9244 ms |
 | Sobel Kernel Time              |   1.0189 ms |
