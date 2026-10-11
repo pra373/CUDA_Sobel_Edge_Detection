@@ -6,13 +6,13 @@ The project uses **two separate CUDA kernels**, with Sobel edge detection being 
 
 ## Input Image
 
-* **Resolution:** 4160 � 6240
+* **Resolution:** 4160 X 6240
 * **Channels:** 3 (RGB)
 * **Total Pixels:** 25,958,400 (~25.96 megapixels)
 
 <!-- Add your input image here -->
 
-![Input Image](resources\rose.jpg)
+![Input Image](resources/rose.jpg)
 
 ## How It Works
 
@@ -86,7 +86,7 @@ The intermediate image produced by the grayscale CUDA kernel.
 * **GPU Computing:** NVIDIA CUDA
 * **Image Loading:** `stb_image`
 * **Image Writing:** `stb_image_write`
-* **Thread Block Size:** 32 � 32
+* **Thread Block Size:** 32 X 32
 * **CUDA Kernels:** Grayscale Conversion and Sobel Edge Detection
 
 Each CUDA thread processes an individual image pixel. Using a grid of thread blocks allows the GPU to process many pixels in parallel.
